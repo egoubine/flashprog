@@ -17,12 +17,13 @@ PREFIX ?= /usr/local
 
 PKG_CONFIG ?= pkg-config
 
-CFLAGS ?= -O2 -Wall -std=gnu99
+CFLAGS ?= -O2 -Wall -std=gnu99 -g
 CFLAGS += $(shell $(PKG_CONFIG) --cflags libusb-1.0)
 
 LDFLAGS ?=
-LDFLAGS += -lpthread
-LDFLAGS += $(shell $(PKG_CONFIG) --libs libusb-1.0)
+LDFLAGS += -lpthread -lusb-1.0
+
+#//LDFLAGS += $(shell $(PKG_CONFIG) --libs libusb-1.0)
 
 DEPDIR := .deps
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
