@@ -485,7 +485,7 @@ int GetConfigVer()
     return Ver;
 }
 
-int main(int argc, char* argv[])
+int dpcmd(int my_argc, char my_argv[13][100], const U8 *dataOut,U8 *dataIn)
 { 
 #if 0 //Check all USB device capability   //evy test SF700
 	Check(argc,argv);
@@ -504,11 +504,6 @@ int main(int argc, char* argv[])
 
     g_ucOperation = 0;
     GetLogPath(g_LogPath);
-
-    if (argc == 1) {
-        cli_classic_usage(false);
-        return 0;
-    }
 
     /*
      * Obtain the (optional) bus number and device number to
@@ -552,193 +547,209 @@ int main(int argc, char* argv[])
     LeaveStandaloneMode(0);
     QueryBoard(0);
 
-    while ((c = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
-        switch (c) {
-        case '?':
-            cli_classic_usage(true);
-            CloseProject();
-            ExitProgram();
-            return EXCODE_PASS;
-        case 'L':
-            g_ucOperation |= LIST_TYPE;
-            break;
-        case 'd':
-            bDetect = true;
-            break;
-        case 'C':
-            g_ucOperation |= CHECK_INFO;
-            break;
-        case 'b':
-            g_ucOperation |= BLANK;
-            break;
-        case 'e':
-            g_ucOperation |= ERASE;
-            break;
-        case 'r':
-            g_parameter_read = optarg;
-            g_ucOperation |= READ_TO_FILE;  
-            break;
-        case 'p':
-            g_parameter_program = optarg;
-            g_ucOperation |= PROGRAM;
-            break;
-        case 'u':
-            g_parameter_auto = optarg;
-            g_ucOperation |= BATCH;
-            g_BatchIndex = 2;
-            break;
-        case 'z':
-            g_parameter_batch = optarg;
-            g_ucOperation |= BATCH;
-            g_BatchIndex = 1;
-            break;
-        case 's': // display chip checksum
-            g_ucOperation |= CSUM;
-            break;
-        case 'f': //display file checksum
-            g_parameter_fsum = optarg;
-            g_ucOperation |= FSUM;
-            break;
-        case 'I':
-            g_parameter_raw = optarg;
-            break;
-        case 'R': //raw-require-return
-            g_parameter_raw_return = optarg;
-            break;
-            /* Optional Switches that add fine-tune ability to Basic Switches: */
-        case 'a':
-            g_parameter_addr = optarg;
-            g_uiAddr = 0;
-            sscanf(optarg, "%x", &g_uiAddr);
-            break;
-        case 'l':
-            g_uiLen = 0;
-            if (strstr(optarg, "0x"))
-                sscanf(optarg, "%zx", &g_uiLen);
-            else
-                sscanf(optarg, "%zu", &g_uiLen);
-            break;
-        case 'v':
-            g_ucOperation |= VERIFY;
-            break;
-        case 'x':
-            g_ucFill = 0xFF;
-            sscanf(optarg, "%x", &g_ucFill);
-            break;
-        case 'T':
-            g_parameter_type = optarg; //type
-            break;
-        case 'S': //lock start
-            sscanf(optarg, "%x", &g_uiLockStart);
-            //                l_opt_arg = optarg;
-            //             printf("hexadecimal starting address (with arg: %s)\n", l_opt_arg);
-            break;
-        case 'N': //lock length
-            sscanf(optarg, "%x", &g_uiLockLen);
-            //                 l_opt_arg = optarg;
-            //            printf("hexadecimal length of area that will be kept unchanged while updating (with arg: %s)\n", l_opt_arg);
-            break;
-        case 'B':
-            sscanf(optarg, "%d", &g_uiBlink);
-            g_ucOperation |= BLINK;
-            break;
-        case 'D': // device  
-            bDevice = true;
-            sscanf(optarg, "%x", &g_uiDevNum); 
-            break;
-        case 'X': // device-SN
-            l_opt_arg = optarg;
-            //printf("activate only the programmer connected to USBx (with arg: %s)\n", l_opt_arg);
+    g_parameter_type = my_argv[2]; //type
+    g_parameter_vcc  = my_argv[4];
+    
+    l_opt_arg = my_argv[6];
+    sscanf(l_opt_arg, "%d", &g_ucSPIClock);
+    
+    g_parameter_target = my_argv[8];
+    sscanf(my_argv[8], "%d", &g_ucTarget);
+    
+    g_parameter_raw_return = my_argv[10];
+    
+    g_parameter_raw = my_argv[12];
+    printf("got raw command: <%s>\n", my_argv[12]);
+      
+    
+//     while ((c = getopt_long(argc, argv, short_options, long_options, NULL)) != -1) {
+//         switch (c) {
+//         case '?':
+//             cli_classic_usage(true);
+//             CloseProject();
+//             ExitProgram();
+//             return EXCODE_PASS;
+//         case 'L':
+//             g_ucOperation |= LIST_TYPE;
+//             break;
+//         case 'd':
+//             bDetect = true;
+//             break;
+//         case 'C':
+//             g_ucOperation |= CHECK_INFO;
+//             break;
+//         case 'b':
+//             g_ucOperation |= BLANK;
+//             break;
+//         case 'e':
+//             g_ucOperation |= ERASE;
+//             break;
+//         case 'r':
+//             g_parameter_read = optarg;
+//             g_ucOperation |= READ_TO_FILE;  
+//             break;
+//         case 'p':
+//             g_parameter_program = optarg;
+//             g_ucOperation |= PROGRAM;
+//             break;
+//         case 'u':
+//             g_parameter_auto = optarg;
+//             g_ucOperation |= BATCH;
+//             g_BatchIndex = 2;
+//             break;
+//         case 'z':
+//             g_parameter_batch = optarg;
+//             g_ucOperation |= BATCH;
+//             g_BatchIndex = 1;
+//             break;
+//         case 's': // display chip checksum
+//             g_ucOperation |= CSUM;
+//             break;
+//         case 'f': //display file checksum
+//             g_parameter_fsum = optarg;
+//             g_ucOperation |= FSUM;
+//             break;
+//         case 'I':
+//             g_parameter_raw = optarg;
+//             printf("got raw command: <%s>\n", optarg);
+//             break;
+//         case 'R': //raw-require-return
+//             g_parameter_raw_return = optarg;
+//             break;
+//             /* Optional Switches that add fine-tune ability to Basic Switches: */
+//         case 'a':
+//             g_parameter_addr = optarg;
+//             g_uiAddr = 0;
+//             sscanf(optarg, "%x", &g_uiAddr);
+//             break;
+//         case 'l':
+//             g_uiLen = 0;
+//             if (strstr(optarg, "0x"))
+//                 sscanf(optarg, "%zx", &g_uiLen);
+//             else
+//                 sscanf(optarg, "%zu", &g_uiLen);
+//             break;
+//         case 'v':
+//             g_ucOperation |= VERIFY;
+//             break;
+//         case 'x':
+//             g_ucFill = 0xFF;
+//             sscanf(optarg, "%x", &g_ucFill);
+//             break;
+//         case 'T':
+//             g_parameter_type = optarg; //type
+//             break;
+//         case 'S': //lock start
+//             sscanf(optarg, "%x", &g_uiLockStart);
+//             //                l_opt_arg = optarg;
+//             //             printf("hexadecimal starting address (with arg: %s)\n", l_opt_arg);
+//             break;
+//         case 'N': //lock length
+//             sscanf(optarg, "%x", &g_uiLockLen);
+//             //                 l_opt_arg = optarg;
+//             //            printf("hexadecimal length of area that will be kept unchanged while updating (with arg: %s)\n", l_opt_arg);
+//             break;
+//         case 'B':
+//             sscanf(optarg, "%d", &g_uiBlink);
+//             g_ucOperation |= BLINK;
+//             break;
+//         case 'D': // device  
+//             bDevice = true;
+//             sscanf(optarg, "%x", &g_uiDevNum); 
+//             break;
+//         case 'X': // device-SN
+//             l_opt_arg = optarg;
+//             //printf("activate only the programmer connected to USBx (with arg: %s)\n", l_opt_arg);
 
-            bDeviceSN = true;  
-            break;
-        case 'W':
-            //	l_opt_arg = optarg;
-            //	printf("Fix programmer serial number with programmer sequence. (with arg: %s)\n", l_opt_arg);
-            //	break;
-            g_parameter_loadfile_with_verify = optarg;
-            g_ucOperation |= LOADFILEWITHVERIFY;
-            break;
-        case 'V':
-            sscanf(optarg, "%d", &g_uiDeviceID);
-            g_ucOperation |= DEVICE_ID; //list device id
-            break;
-            /* Miscellaneous options: */
-        case 't':
-            l_opt_arg = optarg;
-            sscanf(l_opt_arg, "%d", &g_uiTimeout);
-            break;
-        case 'g':
-            g_parameter_target = optarg;
-            sscanf(optarg, "%d", &g_ucTarget);
-            break;
-        case 'c':
-            g_parameter_vcc = optarg; 
-            sscanf(optarg, "%d", &g_Vcc);
-            break;
-        case 'P':
-            g_bEnableVpp = true;
-            break;
-        case 'O': //Log file
-            strcpy(g_LogPath, optarg);
-            //					printf("%s\n",g_LogPath);
-            break;
-        case 'i':
-            g_bDisplayTimer = false;
-            break;
-        case 'k':
-            l_opt_arg = optarg;
-            sscanf(l_opt_arg, "%d", &g_ucSPIClock);
-            break;
-        case '1':
-            l_opt_arg = optarg;
-            sscanf(l_opt_arg, "%d", &g_IO1Select);
-            break;
-        case '4':
-            l_opt_arg = optarg;
-            sscanf(l_opt_arg, "%d", &g_IO4Select);
-            break;
-        case 'U':
-            g_parameter_fw = optarg;
-            iExitCode = FirmwareUpdate();
-            goto Exit;
-            break;
-#if 0
-        case 'E':
-            g_tv_display_delta_s = atof(optarg);
-            if (g_tv_display_delta_s <= 0) {
-                fprintf(stderr, "E: invalid number"
-                                " of seconds for display delta"
-                                " (%f); expect larger than"
-                                " zero\n",
-                    g_tv_display_delta_s);
-                return 1;
-            }
-            break;
-#endif
-        case 'G':
-            r = strtoul(optarg, NULL, 10);
-            if (r == ULONG_MAX || r >= 256) {
-                fprintf(stderr, "E: invalid device"
-                    " number; expected 1-255\n");
-                return 1;
-            }
-            g_usb_devnum = (unsigned char) r;
-            break;
-        case 'H':
-            r = strtoul(optarg, NULL, 10);
-            if (r == ULONG_MAX) {
-                fprintf(stderr, "E: invalid bus"
-                    " number\n");
-                return 1;
-            }
-            g_usb_busnum = (unsigned) r;
-            break;
-        default:
-            break;
-        }
+//             bDeviceSN = true;  
+//             break;
+//         case 'W':
+//             //	l_opt_arg = optarg;
+//             //	printf("Fix programmer serial number with programmer sequence. (with arg: %s)\n", l_opt_arg);
+//             //	break;
+//             g_parameter_loadfile_with_verify = optarg;
+//             g_ucOperation |= LOADFILEWITHVERIFY;
+//             break;
+//         case 'V':
+//             sscanf(optarg, "%d", &g_uiDeviceID);
+//             g_ucOperation |= DEVICE_ID; //list device id
+//             break;
+//             /* Miscellaneous options: */
+//         case 't':
+//             l_opt_arg = optarg;
+//             sscanf(l_opt_arg, "%d", &g_uiTimeout);
+//             break;
+//         case 'g':
+//             g_parameter_target = optarg;
+//             sscanf(optarg, "%d", &g_ucTarget);
+//             break;
+//         case 'c':
+//             g_parameter_vcc = optarg; 
+//             sscanf(optarg, "%d", &g_Vcc);
+//             break;
+//         case 'P':
+//             g_bEnableVpp = true;
+//             break;
+//         case 'O': //Log file
+//             strcpy(g_LogPath, optarg);
+//             //					printf("%s\n",g_LogPath);
+//             break;
+//         case 'i':
+//             g_bDisplayTimer = false;
+//             break;
+//         case 'k':
+//             l_opt_arg = optarg;
+//             sscanf(l_opt_arg, "%d", &g_ucSPIClock);
+//             break;
+//         case '1':
+//             l_opt_arg = optarg;
+//             sscanf(l_opt_arg, "%d", &g_IO1Select);
+//             break;
+//         case '4':
+//             l_opt_arg = optarg;
+//             sscanf(l_opt_arg, "%d", &g_IO4Select);
+//             break;
+//         case 'U':
+//             g_parameter_fw = optarg;
+//             iExitCode = FirmwareUpdate();
+//             goto Exit;
+//             break;
+// #if 0
+//         case 'E':
+//             g_tv_display_delta_s = atof(optarg);
+//             if (g_tv_display_delta_s <= 0) {
+//                 fprintf(stderr, "E: invalid number"
+//                                 " of seconds for display delta"
+//                                 " (%f); expect larger than"
+//                                 " zero\n",
+//                     g_tv_display_delta_s);
+//                 return 1;
+//             }
+//             break;
+// #endif
+//         case 'G':
+//             r = strtoul(optarg, NULL, 10);
+//             if (r == ULONG_MAX || r >= 256) {
+//                 fprintf(stderr, "E: invalid device"
+//                     " number; expected 1-255\n");
+//                 return 1;
+//             }
+//             g_usb_devnum = (unsigned char) r;
+//             break;
+//         case 'H':
+//             r = strtoul(optarg, NULL, 10);
+//             if (r == ULONG_MAX) {
+//                 fprintf(stderr, "E: invalid bus"
+//                     " number\n");
+//                 return 1;
+//             }
+//             g_usb_busnum = (unsigned) r;
+//             break;
+//         default:
+//             break;
+//         }
 
-    }
+//     }
  
     int dev_cnt = get_usb_dev_cnt();
  
@@ -882,7 +893,7 @@ int main(int argc, char* argv[])
     }
     if (iExitCode != EXCODE_PASS)
         goto Exit;
-    iExitCode = Handler();
+    iExitCode = Handler(dataOut, dataIn);
 
 Exit: 
     printf("\n\n");
@@ -1119,7 +1130,7 @@ void sin_handler(int sig)
     }
 }
 
-int Handler(void)
+int Handler(const char *dataOut,char *dataIn)
 {  
     if (Is_usbworking(0) == true) {
 #if 0
@@ -1159,10 +1170,10 @@ int Handler(void)
         int dev_cnt = get_usb_dev_cnt();
         if (g_uiDevNum == 0) {
             for (int i = 0; i < dev_cnt; i++) {
-                RawInstructions(i);
+                RawInstructions(i, dataIn);
             }
         } else if (g_uiDevNum <= dev_cnt) {
-            RawInstructions(g_uiDevNum - 1);
+            RawInstructions(g_uiDevNum - 1, dataIn);
 
         } else {
             printf("Error: Did not find the programmer.\n");
@@ -1250,6 +1261,7 @@ void CloseProject(void)
 
 bool DetectChip(void)
 { 
+    char dataIn[100];
     int dev_cnt = get_usb_dev_cnt();
     Chip_Info = GetFirstDetectionMatch(strTypeName,0);
     if (g_uiDevNum == 0) { 
@@ -1266,7 +1278,7 @@ bool DetectChip(void)
             printf("%s parameters to be applied by default\n", Chip_Info.TypeName);
             printf("%s chip size is %zd bytes.\n\n", Chip_Info.TypeName, Chip_Info.ChipSizeInByte);
 
-            RawInstructions(i);
+            RawInstructions(i, dataIn);
         }
     } else if (g_uiDevNum <= dev_cnt) { 
         if (!Is_usbworking(g_uiDevNum - 1)) {
@@ -1281,7 +1293,7 @@ bool DetectChip(void)
         printf("%s parameters to be applied by default\n", Chip_Info.TypeName);
         printf("%s chip size is %zd bytes.\n\n", Chip_Info.TypeName, Chip_Info.ChipSizeInByte);
 
-        RawInstructions(g_uiDevNum - 1);
+        RawInstructions(g_uiDevNum - 1, dataIn);
 
     } else
         printf("Error: Did not find the programmer.\n");
@@ -1423,13 +1435,14 @@ bool CheckProgrammerInfo(void)
     		printf("\nDevice %d (DP%06d):\n", g_uiDevNum, dwUID);
  	    }
 	    
+        int var = 1;
 
 	    uiFPGAVer = GetFPGAVersion(g_uiDevNum - 1);  
             GetFirmwareVer(g_uiDevNum - 1);
 	    if(g_bIsSF600[g_uiDevNum - 1])
 	    { 
-    		if(CheckSDCard(g_uiDevNum - 1i))
-		    printf("        Programmer type : SF600Plus\n");
+    		if(CheckSDCard(g_uiDevNum - var))
+		        printf("        Programmer type : SF600Plus\n");
 		printf("        Programmer type : SF600Plus\n");
 		printf("        Firmware version : %s\n",g_FW_ver);
 		printf("        FPGA version : 0x%x\n",uiFPGAVer);
@@ -1709,9 +1722,9 @@ void do_ReadSR(int Index)
         printf("SR=0x%02X\n", cSR);
 }
 
-void do_RawInstructinos_2(int outDLen, char* para, int Index)
+void do_RawInstructinos_2(int outDLen, char* para, int Index, char *dataIn)
 {
-    unsigned char vOut[512];
+    unsigned char vOut[512];// = {0x00,0x00,0x00,0x00,0xA0};
     unsigned char vIn[512] = { 0xFF, 0xFF, 0xFF, 0 };
     int i = 0;
     char* pch;
@@ -1721,7 +1734,7 @@ void do_RawInstructinos_2(int outDLen, char* para, int Index)
         sscanf(pch, "%02hhx", &vOut[i]);
         i++;
         pch = strtok(NULL, " ,;-");
-    }
+ }
 
     // if(strlen(g_parameter_raw_return)>0)
     //	sscanf(g_parameter_raw_return,"%hhu",&Length);
@@ -1734,14 +1747,19 @@ void do_RawInstructinos_2(int outDLen, char* para, int Index)
     if (outDLen > 0) {
         printf("issuing raw instruction \"%s\" returns %d bytes as required:\n", g_parameter_raw, outDLen);
         for (i = 0; i < outDLen; i++)
+        {
             printf("%02X ", vIn[i]);
+            dataIn[i] = vIn[i];
+
+        }
         printf("\n");
     }
 
-    do_ReadSR(Index);
+    printf("Do not read SR\n");
+    //do_ReadSR(Index);
 }
 
-void do_RawInstructions(int Index)
+void do_RawInstructions(int Index, char *dataIn)
 {
     char* pch[30];
     char* pchR;
@@ -1777,15 +1795,15 @@ void do_RawInstructions(int Index)
     }
 
     for (int j = 0; j < i; j++) {
-        do_RawInstructinos_2(pchReturn[j], pch[j], Index);
+        do_RawInstructinos_2(pchReturn[j], pch[j], Index, dataIn);
     }
 }
 
-void RawInstructions(int Index)
+void RawInstructions(int Index, char *dataIn)
 {
     if (strlen(g_parameter_raw) > 0) {
         printf("\nDevice %d:\n", Index + 1);
-        do_RawInstructions(Index);
+        do_RawInstructions(Index, dataIn);
     }
 }
 

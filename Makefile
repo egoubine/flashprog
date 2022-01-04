@@ -17,7 +17,7 @@ PREFIX ?= /usr/local
 
 PKG_CONFIG ?= pkg-config
 
-CFLAGS ?= -O2 -Wall -std=gnu99 -g
+CFLAGS ?= -O2 -Wall -std=gnu99 -g -O0
 CFLAGS += $(shell $(PKG_CONFIG) --cflags libusb-1.0)
 
 LDFLAGS ?=

@@ -561,7 +561,7 @@ bool threadConfiguredReadChip(int Index)
 
 bool threadProgram(int Index)
 {
-    int pthread_mutex_init(pthread_mutex_t * restrict mutex, const pthread_mutexattr_t* restricattr);
+    int pthread_mutex_init(pthread_mutex_t * mutex, const pthread_mutexattr_t* restricattr);
 
     bool result = true;
 

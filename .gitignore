@@ -2,3 +2,9 @@
 *.o
 .deps
 dpcmd
+*.code
+*.log
+*.db
+vscode*
+*.o
+*.lock

@@ -80,6 +80,13 @@ int FlashCommand_SendCommand_OutInstructionWithCS(unsigned char* v, int len, int
 
 int FlashCommand_SendCommand_OneOutOneIn(unsigned char* vOut, int out_len, unsigned char* vIn, int in_len, int Index)
 {
+    printf("Sending to SPI:\n");
+    for (int i =0; i < out_len; i++)
+    {
+        printf("0x%x ",vOut[i]);
+    }
+    printf("\n");
+
     if (FlashCommand_TransceiveOut(vOut, out_len, RESULT_IN, Index) == SerialFlash_FALSE) {
         return SerialFlash_FALSE;
     }
